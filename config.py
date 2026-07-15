@@ -48,17 +48,16 @@ REMAINING_FIXTURES: List[Dict[str, str]] = [
 # are just starting defaults -- fully editable in the UI.
 # ---------------------------------------------------------------------------
 DEFAULT_NATION_TO_WIN_ODDS: Dict[str, float] = {
-    "France": 2.60,
-    "England": 4.47,
-    "Argentina": 5.51,
-    "Spain": 4.16,
+    "England": 4.22,
+    "Argentina": 4.80,
+    "Spain": 1.68,
 }
 
 DEFAULT_TOP_SCORER_ODDS: Dict[str, float] = {
-    "Mbappe": 1.72,
-    "Kane": 17.32,
-    "Bellingham": 26.44,
-    "Dembele": 57.5,
+    "Kane": 10.72,
+    "Bellingham": 18.68,
+    "Messi": 1.95,
+    "Mbappe": 2.62
 }
 
 # Maps a top-scorer candidate to their nation. Used only to build the
