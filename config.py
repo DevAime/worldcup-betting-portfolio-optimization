@@ -67,7 +67,7 @@ PLAYER_TEAM_MAP: Dict[str, str] = {
     "Mbappe": "France",
     "Kane": "England",
     "Bellingham": "England",
-    "Dembele": "France",
+    "Messi": "Argentina",
 }
 
 # ---------------------------------------------------------------------------
