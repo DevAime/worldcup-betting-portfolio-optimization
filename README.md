@@ -1,5 +1,4 @@
-```markdown
-# World Cup 2026 — Semifinal Stage Portfolio Kelly
+# WorldCup 2026 Betting Portfolio Optimizer: A Portfolio Approach to Sports Betting Risk
 
 A decision-support tool for the last three matches of the World Cup
 (France vs Spain, England vs Argentina, then the Final), plus the
@@ -7,33 +6,42 @@ tournament-winner and Golden Boot futures markets. It does not place
 bets or hold money — it turns odds into fair probabilities and turns
 those into stake-size recommendations for you to act on manually.
 
+This app was deployed and live during the tournament's semifinal
+stage, serving real-time stake recommendations to users based on
+live odds.
+
 ## Screenshots
 
+![alt text](image.png)
+
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
+
+## APIs used
+
+**[The Odds API](https://the-odds-api.com/)** — the sole external data
+source, used to fetch live match-level odds (h2h moneyline and
+totals) for the three remaining fixtures:
+
 ```
-worldcup_kelly/
-├── screenshots/
-│   ├── match-odds.png
-│   ├── tournament-futures.png
-│   └── portfolio.png
-├── app.py
-...
-```
-
-```markdown
-## Screenshots
-
-**Match Odds** — scoreboard tiles per fixture, live bookmaker odds, de-vigged fair probability
-![Match Odds tab](screenshots/match-odds.png)
-
-**Tournament Futures** — editable nation-to-win and Golden Boot odds
-![Tournament Futures tab](screenshots/tournament-futures.png)
-
-**Portfolio** — combined bet list, edge, recommended stakes, allocation chart
-![Portfolio tab](screenshots/portfolio.png)
+https://api.the-odds-api.com/v4/sports
 ```
 
-(GitHub renders these inline automatically as long as the relative
-paths match — no need to host the images anywhere else.)
+Specifically, the app calls the `/sports/{sport}/odds` endpoint with
+`sport_key=soccer_fifa_world_cup`, `markets=h2h,totals`, and
+`regions=eu,uk`, filtering the response down to genuine back prices
+(the `h2h` market key) and discarding `h2h_lay` entries, which
+represent the exchange lay/back-against side rather than a price you
+can actually bet at. Requests are cached for one hour
+(`@st.cache_data(ttl=3600)`) and mirrored to a local JSON snapshot so
+the app keeps serving the last-known odds if a call fails or the
+API's quota is exhausted.
+
+There is no reliable free API for the tournament-winner and Golden
+Boot futures markets, so those odds are entered manually (sourced
+from Polymarket) rather than fetched automatically.
 
 ## The idea
 
@@ -90,7 +98,7 @@ bet involving "France"). For two correlated bets `i` and `j`, the
 model estimates their covariance as:
 
 ```
-ρ_ij = min(MAX_CORR, MAX_CORR × √(p_i × p_j))
+ρ_ij   = min(MAX_CORR, MAX_CORR × √(p_i × p_j))
 cov_ij = ρ_ij × √(var_i × var_j)
 ```
 
@@ -130,15 +138,19 @@ From there:
 ## Logic / architecture
 
 ```
-config.py         constants + editable defaults (fixtures, futures odds, correlation knobs)
-odds_fetcher.py    cached live odds fetch + local JSON snapshot fallback
-models.py          devig / Bet / covariance / Kelly optimizer — all the math above
-ui_theme.py        dark "scoreboard" visual styling, no math
-app.py             Streamlit tabs, wires odds + futures into models.kelly_optimize()
+config.py          constants + editable defaults (fixtures, futures odds, correlation knobs)
+odds_fetcher.py     cached live odds fetch + local JSON snapshot fallback
+models.py           devig / Bet / covariance / Kelly optimizer — all the math above
+ui_theme.py         dark "scoreboard" visual styling, no math
+app.py              Streamlit tabs, wires odds + futures into models.kelly_optimize()
 ```
 
 Match odds are fetched automatically (hourly cache + manual refresh
 button); futures odds are entered manually since there's no reliable
 free API for tournament-winner/Golden Boot markets. Both feed into the
 same `Bet` objects and the same optimizer in the Portfolio tab.
-```
+
+## What this is not
+
+- **Not a betting platform.** It never places bets, transmits funds, or connects to any bookmaker/exchange account.
+- **Not investment or gambling advice.** All outputs are estimates from a simplified model, for you to interpret entirely at your own discretion and risk.
