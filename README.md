@@ -1,22 +1,32 @@
-# WorldCup 2026 Betting Portfolio Optimizer: A Portfolio Approach to Sports Betting Risk
+# World Cup 2026 Betting Portfolio Optimizer: A Portfolio Approach to Sports Betting Risk
 
-A decision-support tool for the last three matches of the World Cup
-(France vs Spain, England vs Argentina, then the Final), plus the
-tournament-winner and Golden Boot futures markets. It does not place
-bets or hold money — it turns odds into fair probabilities and turns
-those into stake-size recommendations for you to act on manually.
+A decision-support tool for the World Cup, covering match-winner odds for the remaining fixtures plus the tournament-winner and Golden Boot futures markets. It does not place bets or hold money, it turns odds into fair probabilities and turns those into stake-size recommendations for you to act on manually.
 
 This app was deployed and live during the tournament's semifinal
 stage, serving real-time stake recommendations to users based on
 live odds.
 
-## Screenshots
 
-![C:\Users\aimmu\OneDrive\Bureau\worldcup\screenshots\image.png](image.png)
+<img width="1263" height="647" alt="image" src="https://github.com/user-attachments/assets/74d64051-bb8c-4876-a42f-2b0eda9d80c2" />
 
-![alt text](image-1.png)
+<img width="1278" height="636" alt="image" src="https://github.com/user-attachments/assets/aa6e18fa-9376-4060-822b-0bd9eec9c9a2" />
 
-![alt text](image-2.png)
+<img width="1268" height="638" alt="image" src="https://github.com/user-attachments/assets/23da7c7a-ebaf-4a34-96f9-ed6b61feaf78" />
+
+## Bet types in the portfolio
+
+The portfolio can hold three distinct kinds of bets, each sourced and priced differently but all flowing into the same Bet objects and the same optimizer:
+
+### 1. Match winner (h2h)
+The moneyline outcome of each remaining fixture — win/draw/win, or win/win where draws aren't applicable. Odds are pulled live from The Odds API, de-vigged and averaged across bookmakers per outcome. These bets carry a teams tag (e.g. ["France"]) that's what makes the correlation clustering possible later.
+
+### 2. Tournament winner (nation to win)
+A futures market on which nation lifts the trophy. Since there's no reliable free API for this, odds are entered manually (sourced from Polymarket) via the Tournament Futures tab, then de-vigged the same way as any other fully-covered market — implied probability per team, normalized to sum to 1.
+
+### 3. Top scorer (Golden Boot)
+A futures market on which player finishes as top scorer. Also manually entered and de-vigged like the tournament-winner market. Each player is mapped to their nation (PLAYER_TEAM_MAP in config.py) purely so the correlation model can link a scorer bet to that nation's other bets — a looser, discounted link compared to team-to-team correlation, since a player can miss the Boot even if their team goes all the way, and vice versa.
+
+All three types share the same edge, fair_prob, and best_odds fields, which is what lets the Kelly optimizer treat them as one unified basket rather than three separate pools — a match-winner bet and a tournament-winner bet on the same team compete for the same risk budget instead of being sized independently.
 
 ## APIs used
 
